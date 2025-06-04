@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from typing import List
 import pandas as pd
 from io import BytesIO
+import requests
+import yfinance as yf
 
 from app.db.session import get_db
 from app.models.models import User, StockHolding, MutualFundHolding
@@ -10,6 +12,46 @@ from app.schemas.holdings import StockHoldingResponse, MutualFundHoldingResponse
 from app.api.routes.auth import get_current_user
 
 router = APIRouter()
+
+# Helper function to search for Yahoo Finance ticker
+def search_yahoo_finance_ticker(company_name: str) -> str:
+    url = f"https://query2.finance.yahoo.com/v1/finance/search?q={company_name}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        if response.ok:
+            results = response.json().get('quotes', [])
+            for item in results:
+                if item.get("exchange") == "NSI" and item.get("shortname", "").upper() == company_name.upper():
+                    return item.get("symbol")
+            for item in results:
+                if item.get("exchange") == "BSE" and item.get("shortname", "").upper() == company_name.upper():
+                    return item.get("symbol")
+            for item in results:
+                if item.get("exchange") == "NSI" and company_name.upper() in item.get("shortname", "").upper():
+                    return item.get("symbol")
+            if results:
+                return results[0].get("symbol")
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching ticker for {company_name}: {e}")
+    return "Not Found"
+
+# Helper function to get stock sector
+def get_stock_sector(ticker: str) -> str:
+    if ticker == "Not Found":
+        return "Others"
+    try:
+        stock = yf.Ticker(ticker)
+        sector = stock.info.get("sector", "Others")
+        if not sector:
+            return "Others"
+        return sector
+    except Exception as e:
+        print(f"Error fetching sector for {ticker}: {e}")
+        return "Others"
 
 # --- Stock Holdings Endpoints ---
 @router.post("/stock_holdings/upload", response_model=List[StockHoldingResponse])
@@ -38,9 +80,15 @@ async def upload_stock_holdings(
             )
         holdings = []
         for _, row in df.iterrows():
+            company_name = row['Stock Name']
+            ticker = search_yahoo_finance_ticker(company_name)
+            sector = get_stock_sector(ticker)
+
             holding = StockHolding(
-                name=row['Stock Name'],
+                name=company_name,
                 isin=row['ISIN'],
+                ticker=ticker,
+                sector=sector,
                 quantity=float(row['Quantity']),
                 avg_buy_price=float(row['Average buy price']),
                 buy_value=float(row['Buy value']),

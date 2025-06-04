@@ -22,6 +22,8 @@ class StockHolding(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     isin = Column(String, index=True)
+    ticker = Column(String, index=True, nullable=True)
+    sector = Column(String, index=True, nullable=True, default="Others")
     quantity = Column(Float)
     avg_buy_price = Column(Float)
     buy_value = Column(Float)
