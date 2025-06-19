@@ -105,6 +105,45 @@ const Dashboard = () => {
     };
   };
 
+  const prepareSectorPieChartData = () => {
+    const stockHoldings = holdings.filter(h => h.holding_type === 'stock' && h.sector);
+    
+    const sectorData = stockHoldings.reduce((acc, holding) => {
+      const sector = holding.sector || 'Unknown';
+      acc[sector] = (acc[sector] || 0) + holding.closing_value;
+      return acc;
+    }, {});
+
+    const labels = Object.keys(sectorData);
+    const data = Object.values(sectorData);
+
+    // Generate random colors for sectors for now
+    const backgroundColors = labels.map(() => '#' + Math.floor(Math.random()*16777215).toString(16));
+    const borderColors = backgroundColors.map(color => {
+      // Simple way to make border slightly darker, can be improved
+      let r = parseInt(color.slice(1,3), 16);
+      let g = parseInt(color.slice(3,5), 16);
+      let b = parseInt(color.slice(5,7), 16);
+      r = Math.max(0, r - 20);
+      g = Math.max(0, g - 20);
+      b = Math.max(0, b - 20);
+      return `rgb(${r},${g},${b})`;
+    });
+
+
+    return {
+      labels: labels,
+      datasets: [
+        {
+          data: data,
+          backgroundColor: backgroundColors,
+          borderColor: borderColors,
+          borderWidth: 1,
+        },
+      ],
+    };
+  };
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
@@ -170,6 +209,24 @@ const Dashboard = () => {
             </Typography>
             <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Pie data={preparePieChartData()} options={{ maintainAspectRatio: false }} />
+            </Box>
+          </Paper>
+        </Grid>
+
+        {/* Sector Distribution Chart */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 400 }}>
+            <Typography component="h2" variant="h6" color="primary" gutterBottom>
+              Sector Distribution (Stocks)
+            </Typography>
+            <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {holdings.filter(h => h.holding_type === 'stock' && h.sector).length > 0 ? (
+                <Pie data={prepareSectorPieChartData()} options={{ maintainAspectRatio: false }} />
+              ) : (
+                <Typography variant="body1" color="text.secondary">
+                  No stock sector data available to display.
+                </Typography>
+              )}
             </Box>
           </Paper>
         </Grid>

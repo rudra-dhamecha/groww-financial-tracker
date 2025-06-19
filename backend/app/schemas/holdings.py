@@ -5,6 +5,7 @@ from datetime import datetime
 class StockHoldingBase(BaseModel):
     name: str
     isin: str
+    sector: str | None = None
     quantity: float
     avg_buy_price: float
     buy_value: float
