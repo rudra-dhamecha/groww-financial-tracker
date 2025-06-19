@@ -24,7 +24,11 @@ const theme = createTheme({
 });
 
 const PrivateRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) {
+    // You can use a spinner here if you want
+    return <div style={{textAlign: 'center', marginTop: '2rem'}}>Loading...</div>;
+  }
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 

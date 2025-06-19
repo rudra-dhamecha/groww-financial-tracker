@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -8,10 +8,12 @@ import {
   Box,
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
+import './Navbar.css';
 
 const Navbar = () => {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
@@ -31,7 +33,9 @@ const Navbar = () => {
                 color="inherit"
                 component={RouterLink}
                 to="/"
-                sx={{ mr: 2 }}
+                sx={location.pathname === '/' ? { boxShadow: 3, bgcolor: 'background.paper', color: 'primary.main' } : {}}
+                className={location.pathname === '/' ? 'navbar-active' : ''}
+                style={{ marginRight: 8 }}
               >
                 Dashboard
               </Button>
@@ -39,7 +43,9 @@ const Navbar = () => {
                 color="inherit"
                 component={RouterLink}
                 to="/portfolio"
-                sx={{ mr: 2 }}
+                sx={location.pathname === '/portfolio' ? { boxShadow: 3, bgcolor: 'background.paper', color: 'primary.main' } : {}}
+                className={location.pathname === '/portfolio' ? 'navbar-active' : ''}
+                style={{ marginRight: 8 }}
               >
                 Portfolio
               </Button>
@@ -53,7 +59,9 @@ const Navbar = () => {
                 color="inherit"
                 component={RouterLink}
                 to="/login"
-                sx={{ mr: 2 }}
+                sx={location.pathname === '/login' ? { boxShadow: 3, bgcolor: 'background.paper', color: 'primary.main' } : {}}
+                className={location.pathname === '/login' ? 'navbar-active' : ''}
+                style={{ marginRight: 8 }}
               >
                 Login
               </Button>
@@ -61,6 +69,8 @@ const Navbar = () => {
                 color="inherit"
                 component={RouterLink}
                 to="/register"
+                sx={location.pathname === '/register' ? { boxShadow: 3, bgcolor: 'background.paper', color: 'primary.main' } : {}}
+                className={location.pathname === '/register' ? 'navbar-active' : ''}
               >
                 Register
               </Button>

@@ -1,0 +1,9 @@
+.navbar-active {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15), 0 1.5px 4px rgba(0,0,0,0.10);
+  background: #1b20a4 !important;
+  color: #e3f0ff !important;
+  border-radius: 6px;
+  transform: scale(1.07);
+  transition: all 0.18s cubic-bezier(.4,2,.6,1);
+  font-weight: bold;
+} 
