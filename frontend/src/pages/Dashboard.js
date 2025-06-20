@@ -18,7 +18,7 @@ import {
   BarElement,
   Title,
 } from 'chart.js';
-import axios from 'axios';
+import axiosInstance from '../contexts/axiosInstance';
 
 // Register ChartJS components
 ChartJS.register(
@@ -43,8 +43,8 @@ const Dashboard = () => {
   const fetchHoldings = async () => {
     try {
       const [stockResponse, mfResponse] = await Promise.all([
-        axios.get('http://localhost:8000/api/stock_holdings/'),
-        axios.get('http://localhost:8000/api/mutual_fund_holdings/')
+        axiosInstance.get('http://localhost:8000/api/stock_holdings/'),
+        axiosInstance.get('http://localhost:8000/api/mutual_fund_holdings/')
       ]);
       
       const stockHoldings = stockResponse.data.map(holding => ({

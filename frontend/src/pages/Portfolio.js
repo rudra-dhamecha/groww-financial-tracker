@@ -17,7 +17,7 @@ import {
   Tab,
 } from '@mui/material';
 import { Upload as UploadIcon } from '@mui/icons-material';
-import axios from 'axios';
+import axiosInstance from '../contexts/axiosInstance';
 
 const Portfolio = () => {
   const [holdings, setHoldings] = useState([]);
@@ -33,8 +33,8 @@ const Portfolio = () => {
   const fetchHoldings = async () => {
     try {
       const [stockResponse, mfResponse] = await Promise.all([
-        axios.get('http://localhost:8000/api/stock_holdings/'),
-        axios.get('http://localhost:8000/api/mutual_fund_holdings/')
+        axiosInstance.get('http://localhost:8000/api/stock_holdings/'),
+        axiosInstance.get('http://localhost:8000/api/mutual_fund_holdings/')
       ]);
       
       const stockHoldings = stockResponse.data.map(holding => ({
@@ -68,7 +68,7 @@ const Portfolio = () => {
         ? 'http://localhost:8000/api/stock_holdings/upload'
         : 'http://localhost:8000/api/mutual_fund_holdings/upload';
         
-      await axios.post(endpoint, formData, {
+      await axiosInstance.post(endpoint, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../contexts/axiosInstance';
 
 const AuthContext = createContext(null);
 
@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setIsAuthenticated(true);
     }
     setLoading(false);
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
       params.append('username', email);
       params.append('password', password);
 
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         'http://localhost:8000/api/auth/token',
         params,
         { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
 
       const { access_token } = response.data;
       localStorage.setItem('token', access_token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+      axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
       setIsAuthenticated(true);
       return true;
     } catch (error) {
@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (email, password) => {
     try {
-      await axios.post('http://localhost:8000/api/auth/register', {
+      await axiosInstance.post('http://localhost:8000/api/auth/register', {
         email,
         password,
       });
@@ -63,10 +63,13 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
+    delete axiosInstance.defaults.headers.common['Authorization'];
     setIsAuthenticated(false);
     setUser(null);
   };
+
+  // Expose logout globally for axios interceptor
+  window.reactLogout = logout;
 
   const value = {
     user,
