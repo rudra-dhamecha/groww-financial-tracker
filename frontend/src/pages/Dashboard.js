@@ -109,7 +109,7 @@ const Dashboard = () => {
     const stockHoldings = holdings.filter(h => h.holding_type === 'stock' && h.sector);
     
     const sectorData = stockHoldings.reduce((acc, holding) => {
-      const sector = holding.sector || 'Unknown';
+      const sector = holding.sector || 'Others';
       acc[sector] = (acc[sector] || 0) + holding.closing_value;
       return acc;
     }, {});
@@ -117,19 +117,21 @@ const Dashboard = () => {
     const labels = Object.keys(sectorData);
     const data = Object.values(sectorData);
 
-    // Generate random colors for sectors for now
-    const backgroundColors = labels.map(() => '#' + Math.floor(Math.random()*16777215).toString(16));
-    const borderColors = backgroundColors.map(color => {
-      // Simple way to make border slightly darker, can be improved
-      let r = parseInt(color.slice(1,3), 16);
-      let g = parseInt(color.slice(3,5), 16);
-      let b = parseInt(color.slice(5,7), 16);
-      r = Math.max(0, r - 20);
-      g = Math.max(0, g - 20);
-      b = Math.max(0, b - 20);
-      return `rgb(${r},${g},${b})`;
-    });
+    // Custom color mapping for sectors
+    const sectorColors = {
+      'Consumer Cyclical': '#FF5500',
+      'Financial Services': '#003366',
+      'Basic Materials': '#6D462D',
+      'Industrials': '#C00C0C',
+      'Consumer Defensive': '#228B22',
+      'Utilities': '#FFD700',
+      'Technology': '#6500B8',
+      'Others': '#B0B0B0',
+    };
+    const defaultColor = '#B0B0B0';
 
+    const backgroundColors = labels.map(label => sectorColors[label] || defaultColor);
+    const borderColors = backgroundColors.map(color => color);
 
     return {
       labels: labels,
